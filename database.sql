@@ -15,7 +15,8 @@ CREATE TABLE filters (
     travelers INT,
     start DATE,
     finish DATE,
-    additional_needs TEXT
+    additional_needs TEXT,
+	budget float
 );
 
 CREATE TABLE destinations (
@@ -66,11 +67,14 @@ CREATE TABLE accommodation (
 
 CREATE TABLE transportation (
     transportation_id INT AUTO_INCREMENT PRIMARY KEY,
-	start DATE,
-	finish DATE,
-	type enum('plane', 'ship'),
-	cost FLOAT
+    dest_id INT,
+    start DATE,
+    finish DATE,
+    type ENUM('plane', 'ship'),
+    cost FLOAT,
+    FOREIGN KEY (dest_id) REFERENCES destinations(destination_id)
 );
+
 
 
 CREATE TABLE trips (
