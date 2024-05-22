@@ -7,7 +7,8 @@ CREATE TABLE users (
     surname VARCHAR(255),
     email VARCHAR(255),
     username VARCHAR(255),
-    password VARCHAR(255)
+    password VARCHAR(255),
+    points INT(5)
 );
 CREATE TABLE filters (
     filter_id INT AUTO_INCREMENT PRIMARY KEY,
