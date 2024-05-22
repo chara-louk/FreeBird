@@ -90,3 +90,11 @@ CREATE TABLE trips (
     FOREIGN KEY (accommodation_id) REFERENCES accommodation(accommodation_id),
     FOREIGN KEY (transportation_id) REFERENCES transportation(transportation_id)
 	);
+
+INSERT INTO destinations (location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food, shopping, mountains, forest, night_life, ratings)
+VALUES
+('Paris', 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 4.5),
+('Sydney', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 4.8),
+('Rio de Janeiro', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 4.2),
+('Tokyo', 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 4.6),
+('Cape Town', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 4.4);
