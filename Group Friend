@@ -1,0 +1,108 @@
+import tkinter as tk
+from PIL import Image, ImageTk
+
+def on_entry_click(event, entry, default_text):
+    if entry.get("1.0", "end-1c") == default_text:
+        entry.delete("1.0", "end-1c")
+        entry.config(fg='black')
+
+def submit_text():
+    texts = []
+    for entry in text_entries:
+        text = entry.get("1.0", "end-1c")
+        texts.append(text)
+        print("Submitted text:", text)
+    open_new_window()
+
+def add_friend(event=None):
+    y_position = 150 + len(text_entries) * 80  # Adjust position based on number of text boxes
+    new_text_entry = tk.Text(window, height=2, width=25)
+    new_text_entry.place(x=20, y=y_position, anchor="nw")
+    new_text_entry.insert("1.0", "Enter an email")
+    new_text_entry.bind("<FocusIn>", lambda event: on_entry_click(event, new_text_entry, "Enter an email"))
+    text_entries.append(new_text_entry)
+
+    # Move the submit button down
+    submit_button.place_configure(y=y_position + 80)
+
+def open_new_window():
+    window.withdraw()  # Hide the main window
+    new_window = tk.Toplevel()
+    new_window.title("Add Names")
+    new_window.geometry(f"{background_photo.width()}x{background_photo.height()}")
+
+    # Create a canvas for the background image in the new window
+    new_canvas = tk.Canvas(new_window, width=background_photo.width(), height=background_photo.height())
+    new_canvas.pack(fill="both", expand=True)
+    new_canvas.create_image(0, 0, image=background_photo, anchor="nw")
+
+    def on_close_new_window():
+        new_window.destroy()  # Close the new window
+        window.deiconify()  # Show the main window again
+
+    new_window.protocol("WM_DELETE_WINDOW", on_close_new_window)
+
+    name_entry = tk.Text(new_canvas, height=2, width=25)
+    name_entry.place(x=20, y=200, anchor="nw")
+    name_entry.insert("1.0", "Enter a name")
+    name_entry.bind("<FocusIn>", lambda event: on_entry_click(event, name_entry, "Enter a name"))
+
+    submit_name_button = tk.Button(new_canvas, text="Submit Name",
+                                  command=lambda: print("Submitted name:", name_entry.get("1.0", "end-1c")))
+    submit_name_button.place(x=140, y=280, anchor="nw")
+
+    # Create an "Add Photo" label
+    add_photo_label = tk.Label(new_canvas, text="Add Photo", fg="blue", cursor="hand2")
+    add_photo_label.place(x=20, y=250, anchor="nw")
+    add_photo_label.bind("<Button-1>", add_photo)  # Bind click event
+
+    # Create a back button to return to the main window
+    back_button = tk.Button(new_canvas, text="Back", command=on_close_new_window)
+    back_button.place(x=20, y=280, anchor="nw")
+
+# Create the main window
+window = tk.Tk()
+window.title("FreeBird")
+
+# Load background image
+try:
+    background_image = Image.open("C:/Apps/iphonefriends.jpg")
+    background_photo = ImageTk.PhotoImage(background_image)
+
+    # Create a canvas for the background image
+    canvas = tk.Canvas(window, width=background_photo.width(), height=background_photo.height())
+    canvas.pack(fill="both", expand=True)
+    canvas.create_image(0, 0, image=background_photo, anchor="nw")
+
+    # List to hold all text entries
+    text_entries = []
+
+    # Create the first text box
+    text_entry1 = tk.Text(window, height=2, width=25)
+    text_entry1.place(x=20, y=150, anchor="nw")  # Place at specific coordinates
+    text_entry1.insert("1.0", "Enter the 1st email")
+    text_entry1.bind("<FocusIn>", lambda event: on_entry_click(event, text_entry1, "Enter the 1st email"))  # Bind focus event
+    text_entries.append(text_entry1)
+
+    # Create the second text box
+    text_entry2 = tk.Text(window, height=2, width=25)
+    text_entry2.place(x=20, y=230, anchor="nw")  # Place at specific coordinates
+    text_entry2.insert("1.0", "Enter the 2nd email")
+    text_entry2.bind("<FocusIn>", lambda event: on_entry_click(event, text_entry2, "Enter the 2nd email"))  # Bind focus event
+    text_entries.append(text_entry2)
+
+    # Create a button to submit the text
+    submit_button = tk.Button(window, text="Create", command=submit_text)
+    submit_button.place(x=150, y=310, anchor="nw")  # Place at specific coordinates
+
+    # Create a label to add a friend
+    add_friend_label = tk.Label(window, text="Add Friends", fg="blue", cursor="hand2")
+    add_friend_label.place(x=150, y=125, anchor="nw")  # Place at specific coordinates
+    add_friend_label.bind("<Button-1>", add_friend)  # Bind click event
+
+    print("Image loaded successfully.")
+except Exception as e:
+    print("Error loading image:", e)
+
+# Run the application
+window.mainloop()
