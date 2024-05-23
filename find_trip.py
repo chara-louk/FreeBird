@@ -10,52 +10,6 @@ db = mysql.connector.connect(
     database="freebird"
 )
 
-
-def display_destinations_page(filtered_destinations, window):
-    destinations_window = tk.Toplevel(window)
-    destinations_window.title("Select Destination")
-
-    bg_image = Image.open("C:/ceid7/software-eng/project/iphone2destinations.png")
-    bg_photo = ImageTk.PhotoImage(bg_image)
-
-    destinations_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
-
-    bg_canvas = tk.Canvas(destinations_window, width=bg_photo.width(), height=bg_photo.height())
-    bg_canvas.pack(fill="both", expand=True)
-    bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-    bg_canvas.image = bg_photo
-
-    frame = ttk.Frame(bg_canvas, padding=20)
-    frame.place(relx=0.5, rely=0.5, anchor="center")
-
-    ttk.Label(frame, text="Select a destination:", font=("Helvetica", 16, "bold")).pack(anchor="center")
-
-    listbox = tk.Listbox(frame, selectmode="single", width=30, height=15, font=("Helvetica", 12))
-    listbox.pack(padx=4, pady=4, fill="both", expand=True)
-
-    for dest, missing_needs in filtered_destinations:
-        display_text = dest.location
-        if missing_needs:
-            display_text += f" (doesn't have: {', '.join(missing_needs)})"
-        listbox.insert(tk.END, display_text)
-
-    def on_select(event=None):
-        selected_index = listbox.curselection()
-        if selected_index:
-            selected_dest = filtered_destinations[selected_index[0]][0]
-            dest_id = selected_dest.destination_id
-            start = None
-            finish = None
-            type = None
-            cost = None
-            transportation_instance = Transportation(dest_id, start, finish, type, cost, destination_id=dest_id)
-            transportation_instance.display_flights(selected_dest)
-    listbox.bind('<<ListboxSelect>>', on_select)
-
-    select_button = ttk.Button(frame, text="Select", command=on_select)
-    select_button.pack(pady=10)
-
-
 class Destination:
     def __init__(self, destination_id, location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food,
                  shopping, mountains, forest, night_life, ratings, additional_needs):
@@ -78,6 +32,52 @@ class Destination:
         self.night_life = night_life
         self.ratings = ratings
         self.additional_needs = additional_needs
+
+        def display_destinations_page(self,filtered_destinations,window):
+        destinations_window = tk.Toplevel(window)
+        destinations_window.title("Select Destination")
+
+        # Load background image
+        bg_image = Image.open("C:/ceid7/software-eng/project/iphone2destinations.png")
+        bg_photo = ImageTk.PhotoImage(bg_image)
+
+        destinations_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
+
+        bg_canvas = tk.Canvas(destinations_window, width=bg_photo.width(), height=bg_photo.height())
+        bg_canvas.pack(fill="both", expand=True)
+        bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+        bg_canvas.image = bg_photo
+
+        # Frame for the destination selection
+        frame = ttk.Frame(bg_canvas, padding=20)
+        frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        ttk.Label(frame, text="Select a destination:", font=("Helvetica", 16, "bold")).pack(anchor="center")
+
+        listbox = tk.Listbox(frame, selectmode="single", width=30, height=15, font=("Helvetica", 12))
+        listbox.pack(padx=4, pady=4, fill="both", expand=True)
+
+        for dest, missing_needs in filtered_destinations:
+            display_text = dest.location
+            if missing_needs:
+                display_text += f" (doesn't have: {', '.join(missing_needs)})"
+            listbox.insert(tk.END, display_text)
+
+        def on_select(event=None):
+            selected_index = listbox.curselection()
+            if selected_index:
+                selected_dest = filtered_destinations[selected_index[0]][0]
+                dest_id = selected_dest.destination_id
+                start = None
+                finish = None
+                type = None
+                cost = None
+                transportation_instance = Transportation(dest_id, start, finish, type, cost, destination_id=dest_id)
+                transportation_instance.display_flights(selected_dest)
+        listbox.bind('<<ListboxSelect>>', on_select)
+
+        select_button = ttk.Button(frame, text="Select", command=on_select)
+        select_button.pack(pady=10)
 
     @staticmethod
     def find_destinations(characteristic_vars, characteristics, rating_entry, filter_additional_needs, start_date_entry,
