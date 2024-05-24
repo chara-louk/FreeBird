@@ -10,6 +10,7 @@ db = mysql.connector.connect(
     database="freebird"
 )
 
+
 class Destination:
     def __init__(self, destination_id, location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food,
                  shopping, mountains, forest, night_life, ratings, additional_needs):
@@ -33,11 +34,10 @@ class Destination:
         self.ratings = ratings
         self.additional_needs = additional_needs
 
-        def display_destinations_page(self,filtered_destinations,window):
+    def display_destinations_page(self,filtered_destinations,window):
         destinations_window = tk.Toplevel(window)
         destinations_window.title("Select Destination")
 
-        # Load background image
         bg_image = Image.open("C:/ceid7/software-eng/project/iphone2destinations.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
 
@@ -48,7 +48,6 @@ class Destination:
         bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
         bg_canvas.image = bg_photo
 
-        # Frame for the destination selection
         frame = ttk.Frame(bg_canvas, padding=20)
         frame.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -67,13 +66,13 @@ class Destination:
             selected_index = listbox.curselection()
             if selected_index:
                 selected_dest = filtered_destinations[selected_index[0]][0]
-                dest_id = selected_dest.destination_id
-                start = None
-                finish = None
-                type = None
-                cost = None
-                transportation_instance = Transportation(dest_id, start, finish, type, cost, destination_id=dest_id)
-                transportation_instance.display_flights(selected_dest)
+
+                filter_instance = Filter.retrieve_filter_from_db()
+                if filter_instance:
+                    Transportation.display_filtered_flights(selected_dest, filter_instance)
+                else:
+                    messagebox.showerror("Error", "No filter data found.")
+
         listbox.bind('<<ListboxSelect>>', on_select)
 
         select_button = ttk.Button(frame, text="Select", command=on_select)
@@ -107,13 +106,11 @@ class Destination:
         filtered_destinations = []
         for dest in destinations:
             if all(getattr(dest, char) for char in selected_characteristics) and dest.ratings >= user_rating:
-                # Handle None case for dest.additional_needs
                 dest_additional_needs = dest.additional_needs.lower() if dest.additional_needs else ""
                 missing_needs = [need.strip() for need in additional_needs if
                                  need.strip().lower() not in dest_additional_needs]
                 filtered_destinations.append((dest, missing_needs))
 
-        # Display filtered destinations
         if filtered_destinations:
             display_destinations_page(filtered_destinations,window)
         else:
@@ -162,62 +159,106 @@ class Filter:
 
     def save_filter_to_db(self):
         cursor = db.cursor()
-        insert_query = ("INSERT INTO filters (ratings, start, finish, travelers, budget,"
-                        " additional_needs) VALUES (%s, %s, %s, %s, %s, %s)")
+        insert_query = ("INSERT INTO filters (ratings, start, finish, travelers, budget, additional_needs) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)")
         cursor.execute(insert_query, (self.ratings, self.start, self.finish, self.travelers, self.budget, self.additional_needs))
         db.commit()
         cursor.close()
 
+    @staticmethod
+    def retrieve_filter_from_db():
+        cursor = db.cursor()
+        query = "SELECT ratings, start, finish, travelers, budget, additional_needs FROM filters ORDER BY filter_id DESC LIMIT 1"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        cursor.close()
+
+        if result:
+            return Filter(ratings=result[0], start=result[1], finish=result[2], travelers=result[3], additional_needs=result[4], budget=result[5])
+        else:
+            return None
+
 
 class Transportation:
-    transportations = []
-
     def __init__(self, dest_id, start, finish, type, cost, destination_id):
-        self.window = None
-        self.trip_id = dest_id
+        self.dest_id = dest_id
         self.start = start
         self.finish = finish
         self.type = type
         self.cost = cost
         self.destination_id = destination_id
 
-    def save_transp(self):
-        Transportation.transportations.append(self)
-        print("Transportation saved:", self)
-
     @staticmethod
-    def retrieve_flights_from_db(selected_dest):
+    def retrieve_filtered_flights_from_db(selected_dest, filter_instance):
         cursor = db.cursor()
-        query = "SELECT start, finish, type, cost FROM transportation WHERE dest_id = %s"
-        cursor.execute(query, (selected_dest.destination_id,))
+        query = ("SELECT start, finish, type, cost "
+                 "FROM transportation "
+                 "WHERE dest_id = %s "
+                 "AND start >= %s AND finish <= %s ")
+
+        cursor.execute(query, (selected_dest.destination_id, filter_instance.start, filter_instance.finish))
         rows = cursor.fetchall()
+        cursor.close()
 
         flights = []
         for row in rows:
+            flight_start, flight_finish, flight_type, flight_cost = row
             flights.append({
-                'start': row[0],
-                'finish': row[1],
-                'type': row[2],
-                'cost': row[3]
+                'start': flight_start,
+                'finish': flight_finish,
+                'type': flight_type,
+                'cost': flight_cost
             })
-        cursor.close()
         return flights
 
     @staticmethod
-    def display_flights(selected_dest):
-        flights = Transportation.retrieve_flights_from_db(selected_dest)
+    def display_filtered_flights(selected_dest, filter_instance):
+        transportation_window = tk.Toplevel(window)
+        transportation_window.title("Select Route")
 
-        flights_window = tk.Toplevel()
-        flights_window.title("Flights for " + selected_dest.location)
+        bg_image = Image.open("C:/ceid7/software-eng/project/iphone3transp.png")
+        bg_photo = ImageTk.PhotoImage(bg_image)
 
+        transportation_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
+
+        bg_canvas = tk.Canvas(transportation_window, width=bg_photo.width(), height=bg_photo.height())
+        bg_canvas.pack(fill="both", expand=True)
+        bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+        bg_canvas.image = bg_photo
+
+        frame = ttk.Frame(bg_canvas, padding=20)
+        frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        ttk.Label(frame, text="Select a route:", font=("Helvetica", 16, "bold")).pack(anchor="center")
+
+        listbox = tk.Listbox(frame, selectmode="single", width=30, height=15, font=("Helvetica", 12))
+        listbox.pack(padx=4, pady=4, fill="both", expand=True)
+
+        flights = Transportation.retrieve_filtered_flights_from_db(selected_dest, filter_instance)
         if flights:
             for flight in flights:
                 flight_info = f"Start: {flight['start']}, Finish: {flight['finish']}, Type: {flight['type']}, Cost: {flight['cost']}"
-                ttk.Label(flights_window, text=flight_info).pack()
+                listbox.insert(tk.END, flight_info)
         else:
-            ttk.Label(flights_window, text="No flights available for this destination.").pack()
+            ttk.Label(frame, text="No routes for this period.", font=("Helvetica", 12, "bold")).pack(anchor="center")
 
-class FreeBirdApp:
+
+        def on_save():
+            selected_index = listbox.curselection()
+            if selected_index:
+                selected_flight = flights[selected_index[0]]
+                print("Selected flight:", selected_flight)  
+
+
+                messagebox.showinfo("Trip Saved", "Your trip has been saved successfully!")
+            else:
+                messagebox.showwarning("No Selection", "Please select a route.")
+
+        save_button = ttk.Button(frame, text="Save Selected Route", command=on_save)
+        save_button.pack(pady=10)
+
+
+class FilterPage:
 
     def __init__(self, window):
         self.destination_instance = Destination('destination_id', 'location', 'museums', 'nature', 'beach', 'hiking', 'art', 'history', 'science', 'wild_life', 'clubs', 'sports', 'food', 'shopping',
@@ -226,7 +267,7 @@ class FreeBirdApp:
         self.characteristics = ['museums', 'nature', 'beach', 'hiking', 'art', 'history',
                                 'science', 'wild_life', 'clubs', 'sports', 'food', 'shopping', 'mountains', 'forest', 'night_life']
         self.destinations = Destination.fetch_destinations_from_db()
-        self.create_trip(self.characteristics,Destination.find_destinations)
+        self.create_trip(self.characteristics, Destination.find_destinations)
         self.characteristic_vars = [tk.IntVar() for _ in self.characteristics]
         self.rating_entry = None
         self.filter_additional_needs = None
@@ -307,14 +348,52 @@ class FreeBirdApp:
         ttk.Button(frame, text="Find Destinations", command=lambda: Destination.find_destinations(
             self.characteristic_vars, self.characteristics, self.rating_entry, self.filter_additional_needs,
             self.start_date_entry, self.finish_date_entry, self.travelers_entry, self.budget_entry,
-            self.destinations, Filter.save_filter_to_db, display_destinations_page
+            self.destinations, Filter.save_filter_to_db, self.destination_instance.display_destinations_page
         )).grid(row=len(self.characteristics), column=0, columnspan=2)
 
         rating_label = ttk.Label
         self.window.mainloop()
 
+class Trip:
+    def __init__(self, window):
+        self.window = window
+        self.window.title("Trip")
+        self.window.geometry("800x600")
+
+        image_path = "C:/ceid7/software-eng/project/iphonearxiki.png"
+        try:
+            background_image = Image.open(image_path)
+            self.background_photo = ImageTk.PhotoImage(background_image)
+
+            self.window.geometry(f"{self.background_photo.width()}x{self.background_photo.height()}")
+
+            canvas = tk.Canvas(self.window, width=self.background_photo.width(), height=self.background_photo.height())
+            canvas.pack(fill="both", expand=True)
+            canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
+        except FileNotFoundError:
+            print("Image file not found:", image_path)
+
+        button_style = ttk.Style()
+        button_style.configure("Brown.TButton", background="brown", borderwidth=0, bordercolor="brown", font=("Helvetica", 17))
+
+        self.button = ttk.Button(self.window, text="Generate Trip", style="Brown.TButton", command=self.open_freebird)
+        self.button.place(relx=0.3, rely=0.43, anchor="center")
+
+    def open_freebird(self):
+        self.window.withdraw()
+        app_window = tk.Toplevel(self.window)
+        FilterPage(app_window)
+
+    def save_trip(self, transport_data):
+        cursor = db.cursor()
+        insert_query = "INSERT INTO trips (transportation, other_data) VALUES (%s, %s)"
+        cursor.execute(insert_query, (transport_data, "other_trip_data"))
+        db.commit()
+        cursor.close()
+        messagebox.showinfo("Trip Saved", "Your trip has been saved successfully!")
+
 
 if __name__ == "__main__":
     window = tk.Tk()
-    FreeBirdApp(window)
+    Trip(window)
     window.mainloop()
