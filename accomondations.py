@@ -6,57 +6,81 @@ class MyApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry("800x600")
-        self.root.title("Accommodation Booking")
-
-        background_image = tk.PhotoImage(file="image.png")
-        self.background_label = tk.Label(self.root, image=background_image)
-        self.background_label.image = background_image
-        self.background_label.place(relwidth=1, relheight=1)
+        self.root.title("FreeBird")
 
         self.setup_starting_window()
         self.root.mainloop()
 
     def setup_starting_window(self):
         self.clear_window()
-        label = tk.Label(self.root, text="Would you like to reserve an accommodation?", font=('Arial', 14), bg='beige')
+        self.starting_window = tk.Frame(self.root)
+        self.starting_window.place(relwidth=1, relheight=1)
+
+        label = tk.Label(self.starting_window, text="Do you want to proceed?", font=('Arial', 14))
         label.pack(pady=20)
 
-        yes_button = tk.Button(self.root, text="Yes", command=self.select_date, font=('Arial', 12))
+        yes_button = tk.Button(self.starting_window, text="Yes", command=self.show_select_date_window)
         yes_button.pack(side=tk.LEFT, padx=20, pady=20)
 
-        no_button = tk.Button(self.root, text="No", command=self.root.quit, font=('Arial', 12))
+        no_button = tk.Button(self.starting_window, text="No", command=self.root.quit)
         no_button.pack(side=tk.RIGHT, padx=20, pady=20)
 
-    def select_date(self):
+    def show_select_date_window(self):
         self.clear_window()
         self.select_date_window = tk.Frame(self.root)
         self.select_date_window.place(relwidth=1, relheight=1)
 
-        label = tk.Label(self.select_date_window, text="Please select a date", font=('Arial', 14), bg='beige')
+        label = tk.Label(self.select_date_window, text="Select Date", font=('Arial', 14))
         label.pack(pady=20)
 
-        self.calendar = DateEntry(self.select_date_window, width=12, background='darkblue', foreground='white', borderwidth=2)
-        self.calendar.pack(pady=20)
+        self.date_entry = DateEntry(self.select_date_window, font=('Arial', 12), date_pattern='y-mm-dd')
+        self.date_entry.pack(pady=20)
 
-        submit_button = tk.Button(self.select_date_window, text="Submit", command=self.submit_and_show_filters, font=('Arial', 12))
+        submit_button = tk.Button(self.select_date_window, text="Submit", command=self.show_filters)
         submit_button.pack(pady=20)
 
-    def submit_and_show_filters(self):
-        self.RegisterDate()
-        self.show_filters()
-
-    def RegisterDate(self):
-        selected_date = self.calendar.get_date()
-        messagebox.showinfo("Selected Date", f"You selected: {selected_date}")
-
     def show_filters(self):
+        self.selected_date = self.date_entry.get()
         self.clear_window()
-        self.filters_window = tk.Frame(self.root)
+        self.filters_window = tk.Frame(self.root, bg='beige')
         self.filters_window.place(relwidth=1, relheight=1)
 
         label = tk.Label(self.filters_window, text="Filters", font=('Arial', 14), bg='beige')
         label.pack(pady=20)
-        # Add your filters UI components here
+
+        # Price Filter
+        price_label = tk.Label(self.filters_window, text="Maximum Price ($):", font=('Arial', 12), bg='beige')
+        price_label.pack(pady=10)
+        self.price_entry = tk.Entry(self.filters_window, font=('Arial', 12))
+        self.price_entry.pack(pady=10)
+
+        # Accommodation Type Filter
+        type_label = tk.Label(self.filters_window, text="Accommodation Type:", font=('Arial', 12), bg='beige')
+        type_label.pack(pady=10)
+
+        self.accommodation_type_vars = {
+            "Airbnb": tk.BooleanVar(),
+            "Hotel": tk.BooleanVar(),
+            "Hostel": tk.BooleanVar(),
+            "Motel": tk.BooleanVar(),
+            "Bed & Breakfast": tk.BooleanVar()
+        }
+
+        for type_name, var in self.accommodation_type_vars.items():
+            chk = tk.Checkbutton(self.filters_window, text=type_name, variable=var, font=('Arial', 12), bg='beige')
+            chk.pack(anchor='w', padx=20)
+
+        # Submit Button
+        submit_button = tk.Button(self.filters_window, text="Apply Filters", font=('Arial', 12), command=self.apply_filters)
+        submit_button.pack(pady=20)
+
+    def apply_filters(self):
+        max_price = self.price_entry.get()
+        selected_types = [type_name for type_name, var in self.accommodation_type_vars.items() if var.get()]
+        
+        filters_summary = f"Selected Date: {self.selected_date}\nMax Price: {max_price}\nSelected Types: {', '.join(selected_types)}"
+        
+        messagebox.showinfo("Selected Filters", filters_summary)
 
     def clear_window(self):
         for widget in self.root.winfo_children():
