@@ -4,10 +4,10 @@ from tkinter import Toplevel
 from PIL import Image, ImageTk
 import mysql.connector
 
-# diaxeirisi base
+# Διαχείριση βάσης
 class Database:
     def __init__(self, host, user, password, database):
-        self.connection = mysql.connector.connect( #sundesi me base
+        self.connection = mysql.connector.connect(
             host=host,
             user=user,
             password=password,
@@ -15,7 +15,7 @@ class Database:
         )
         self.cursor = self.connection.cursor()
 
-    def user_exists(self, email): #elegxos eggegrammenou xristi
+    def user_exists(self, email):
         self.cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         return self.cursor.fetchone() is not None
 
@@ -29,11 +29,12 @@ class Database:
         self.cursor.close()
         self.connection.close()
 
-# Chat class
+# Κλάση Chat
 class Chat:
     def __init__(self, db):
         self.db = db
-        self.team_name = None
+        self.team_name = ""
+        self.emails = []
 
     def create(self, team_name, emails):
         self.team_name = team_name
@@ -47,27 +48,32 @@ class Chat:
             print(f"Error: {err}")
             self.db.rollback()
 
-    def submit_name(self):
-        print("Team Name:", self.team_name)  # Εκτύπωση της τιμής του team_name για επαλήθευση
+    def submit_name(self, name_entry, new_window, emails):
+        team_name = name_entry.get("1.0", "end-1c")
+        self.create(team_name, emails)
+        new_window.withdraw()  # Απόκρυψη του παραθύρου προσθήκης ονόματος ομάδας
 
+        # Δημιουργία ενός νέου παραθύρου συνομιλίας
         chat_window = tk.Toplevel()
         chat_window.title("Chat Window")
 
+        # Φόρτωση και εμφάνιση της εικόνας ως φόντο στο νέο παράθυρο
         chat_bg_image = Image.open("C:/Apps/chat.jpg")
         chat_bg_photo = ImageTk.PhotoImage(chat_bg_image)
         chat_canvas = tk.Canvas(chat_window, width=chat_bg_photo.width(), height=chat_bg_photo.height())
         chat_canvas.pack(fill="both", expand=True)
         chat_canvas.create_image(0, 0, image=chat_bg_photo, anchor="nw")
 
-        team_name_label = tk.Label(chat_canvas, text=self.team_name, font=("Helvetica", 16), bg=chat_canvas["bg"],
-                                   fg="white")
-        team_name_label.place(x=20, y=20)
+        # Προσθήκη του ονόματος της ομάδας στην κορυφή του παραθύρου
+        team_name_label = tk.Label(chat_canvas, text=team_name, font=("Helvetica", 16), bg="white")
+        team_name_label.place(x=25, y=25)  # Ρυθμίστε τις συντεταγμένες σύμφωνα με την ανάγκη σας
 
+        # Εμφάνιση του νέου παραθύρου
         chat_window.mainloop()
 
 
-# Main application class
-class new_chat:
+# Κύρια κλάση εφαρμογής
+class newChat:
     def __init__(self, root):
         self.root = root
         self.database = Database(
@@ -77,7 +83,7 @@ class new_chat:
             database="freebird"
         )
         self.chat = Chat(self.database)
-        self.ui = chat_new_UI(root, self)
+        self.ui = UI(root, self)
         self.load_background_images()  # Φόρτωση των εικόνων φόντου
 
     def load_background_images(self):
@@ -85,7 +91,7 @@ class new_chat:
         self.background_image = Image.open("C:/Apps/iphonefriends.jpg")
         self.background_photo = ImageTk.PhotoImage(self.background_image)
 
-    def Add_name_image(self, emails):
+    def add_name_image(self, emails):
         self.root.withdraw()  # Απόκρυψη του κύριου παραθύρου
         new_window = tk.Toplevel()
         new_window.title("Add Names")
@@ -97,8 +103,8 @@ class new_chat:
         new_canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
 
         def on_close_new_window():
-            new_window.destroy()  # Close the new window
-            self.root.deiconify()  # Show the main window again
+            new_window.destroy()  # Κλείσιμο του νέου παραθύρου
+            self.root.deiconify()  # Εμφάνιση ξανά του κύριου παραθύρου
 
         new_window.protocol("WM_DELETE_WINDOW", on_close_new_window)
 
@@ -107,7 +113,7 @@ class new_chat:
         name_entry.insert("1.0", "Enter a name")
         name_entry.bind("<FocusIn>", lambda event: self.ui.on_entry_click(event, name_entry, "Enter a name"))
 
-        submit_name_button = tk.Button(new_canvas, text="Submit Name", command=self.chat.submit_name)
+        submit_name_button = tk.Button(new_canvas, text="Submit Name", command=lambda: self.chat.submit_name(name_entry, new_window, emails))
         submit_name_button.place(x=140, y=280, anchor="nw")
 
         add_photo_label = tk.Label(new_canvas, text="Add Photo", fg="blue", cursor="hand2")
@@ -116,10 +122,8 @@ class new_chat:
         back_button = tk.Button(new_canvas, text="Back", command=on_close_new_window)
         back_button.place(x=20, y=280, anchor="nw")
 
-
-
-# UI class
-class chat_new_UI:
+# Κλάση UI
+class UI:
     def __init__(self, root, app):
         self.root = root
         self.app = app
@@ -133,35 +137,32 @@ class chat_new_UI:
         self.background_image = Image.open("C:/Apps/iphonefriends.jpg")
         self.background_photo = ImageTk.PhotoImage(self.background_image)
 
-        # Create a canvas for the background image
+        # Δημιουργία ενός καμβά για την εικόνα φόντου
         self.canvas = tk.Canvas(self.root, width=self.background_photo.width(), height=self.background_photo.height())
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
 
-        # Create the first text box
+        # Δημιουργία του πρώτου πλαισίου κειμένου
         self.create_text_entry("Enter the 1st email", 150)
-        # Create the second text box
+        # Δημιουργία του δεύτερου πλαισίου κειμένου
         self.create_text_entry("Enter the 2nd email", 230)
 
-        # Create a button to submit the text
+        # Δημιουργία κουμπιού για την υποβολή του κειμένου
         self.submit_button = tk.Button(self.root, text="Create", command=self.submit_text)
-        self.submit_button.place(x=150, y=310, anchor="nw")  # Place at specific coordinates
+        self.submit_button.place(x=150, y=310, anchor="nw")
 
-        # Create a label to add a friend
+        # Δημιουργία ετικέτας για την προσθήκη φίλου
         self.add_friend_label = tk.Label(self.root, text="Add Friends", fg="blue", cursor="hand2")
-        self.add_friend_label.place(x=150, y=125, anchor="nw")  # Place at specific coordinates
-        self.add_friend_label.bind("<Button-1>", self.add_member)  # Bind click event
-
-
+        self.add_friend_label.place(x=150, y=125, anchor="nw")
+        self.add_friend_label.bind("<Button-1>", self.add_member)
 
     def create_text_entry(self, default_text, y_position):
         text_entry = tk.Text(self.root, height=2, width=25)
-        text_entry.place(x=20, y=y_position, anchor="nw")  # Place at specific coordinates
+        text_entry.place(x=20, y=y_position, anchor="nw")
         text_entry.insert("1.0", default_text)
-        text_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, text_entry, default_text))  # Bind focus event
+        text_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, text_entry, default_text))
         self.text_entries.append(text_entry)
 
-# na feugei to enter email
     def on_entry_click(self, event, entry, default_text):
         if entry.get("1.0", "end-1c") == default_text:
             entry.delete("1.0", "end-1c")
@@ -175,10 +176,10 @@ class chat_new_UI:
                 messagebox.showerror("Error", f"User with email {email} does not exist.")
                 return
             self.emails.append(email)
-        self.app.Add_name_image(self.emails)
+        self.app.add_name_image(self.emails)
 
     def add_member(self, event=None):
-        y_position = 150 + len(self.text_entries) * 80  # Adjust position based on number of text boxes
+        y_position = 150 + len(self.text_entries) * 80
         new_text_entry = tk.Text(self.root, height=2, width=25)
         new_text_entry.place(x=20, y=y_position, anchor="nw")
         new_text_entry.insert("1.0", "Enter an email")
@@ -186,9 +187,9 @@ class chat_new_UI:
         self.text_entries.append(new_text_entry)
         self.submit_button.place_configure(y=y_position + 80)
 
-
-# Create the main window
+# Δημιουργία του κύριου παραθύρου
 if __name__ == "__main__":
     root = tk.Tk()
-    app = new_chat(root)
+    app = newChat(root)
     root.mainloop()
+
