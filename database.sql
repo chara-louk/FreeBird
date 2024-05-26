@@ -128,6 +128,23 @@ CREATE TABLE booking (
 	FOREIGN KEY (user_id) REFERENCES users(user_id)
 	);
 
+CREATE TABLE restaurants (
+	rest_id INT AUTO_INCREMENT PRIMARY KEY,
+	name varchar(255),
+	type ENUM('restaurants','coffee'),
+	location varchar(255),
+	booking_id int,
+	price_range float,
+	details text,
+	review_id INT,
+	phone int,
+	open ENUM('yes','no'),
+	FOREIGN KEY (booking_id) REFERENCES booking(booking_id),
+	FOREIGN KEY (review_id) REFERENCES reviews(review_id)
+);
+
+
+
 INSERT INTO destinations (location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food, shopping, mountains, forest, night_life, ratings)
 VALUES
 ('Paris', 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 4.5),
