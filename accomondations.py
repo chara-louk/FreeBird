@@ -2,16 +2,16 @@ import tkinter as tk
 from tkinter import messagebox
 from tkcalendar import DateEntry
 
-class MyApp:
+class accomodations:
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry("800x600")
         self.root.title("FreeBird")
 
-        self.setup_starting_window()
+        self.SetupStartingWindow()
         self.root.mainloop()
 
-    def setup_starting_window(self):
+    def SetupStartingWindow(self):
         self.clear_window()
         self.starting_window = tk.Frame(self.root)
         self.starting_window.place(relwidth=1, relheight=1)
@@ -19,13 +19,13 @@ class MyApp:
         label = tk.Label(self.starting_window, text="Do you want to proceed?", font=('Arial', 14))
         label.pack(pady=20)
 
-        yes_button = tk.Button(self.starting_window, text="Yes", command=self.show_select_date_window)
+        yes_button = tk.Button(self.starting_window, text="Yes", command=self.ShowDates)
         yes_button.pack(side=tk.LEFT, padx=20, pady=20)
 
         no_button = tk.Button(self.starting_window, text="No", command=self.root.quit)
         no_button.pack(side=tk.RIGHT, padx=20, pady=20)
 
-    def show_select_date_window(self):
+    def ShowDates(self):
         self.clear_window()
         self.select_date_window = tk.Frame(self.root)
         self.select_date_window.place(relwidth=1, relheight=1)
@@ -36,10 +36,10 @@ class MyApp:
         self.date_entry = DateEntry(self.select_date_window, font=('Arial', 12), date_pattern='y-mm-dd')
         self.date_entry.pack(pady=20)
 
-        submit_button = tk.Button(self.select_date_window, text="Submit", command=self.show_filters)
+        submit_button = tk.Button(self.select_date_window, text="Submit", command=self.ShowFilters)
         submit_button.pack(pady=20)
 
-    def show_filters(self):
+    def ShowFilters(self):
         self.selected_date = self.date_entry.get()
         self.clear_window()
         self.filters_window = tk.Frame(self.root, bg='beige')
@@ -71,10 +71,10 @@ class MyApp:
             chk.pack(anchor='w', padx=20)
 
         # Submit Button
-        submit_button = tk.Button(self.filters_window, text="Apply Filters", font=('Arial', 12), command=self.apply_filters)
+        submit_button = tk.Button(self.filters_window, text="Apply Filters", font=('Arial', 12), command=self.ApplyFilers)
         submit_button.pack(pady=20)
 
-    def apply_filters(self):
+    def ApplyFilers(self):
         max_price = self.price_entry.get()
         selected_types = [type_name for type_name, var in self.accommodation_type_vars.items() if var.get()]
         
@@ -87,4 +87,4 @@ class MyApp:
             widget.destroy()
 
 if __name__ == "__main__":
-    MyApp()
+    accomodations()
