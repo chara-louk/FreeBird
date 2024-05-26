@@ -17,7 +17,7 @@ class Database:
             password=self.PASSWORD,
             database=self.DATABASE
         )
-        self.cursor = self.connection.cursor()
+        self.cursor = self.connection.cursor(buffered=True)
 
     def user_exists(self, email): #ελεγχος εγγεγραμμένου χρήστη
         self.cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
@@ -40,9 +40,10 @@ class Chat: # Διαχείριση συνομιλιών
     def create(self, team_name, emails):
         self.team_name = team_name
         self.emails = emails
-        #ενημέρωση βάσης
+        # Ενημέρωση βάσης
         members = ", ".join(emails)
-        self.db.cursor.execute("INSERT INTO chat (members, name) VALUES (%s, %s)", (members, team_name))
+        # Εισαγωγή νέας εγγραφής στον πίνακα groups
+        self.db.cursor.execute("INSERT INTO groups (members, team_name) VALUES (%s, %s)", (members, team_name))
         self.db.commit()
 
     def add_chat_textbox(self, chat_canvas): # προσθήκη textbox για να γράει ο χρήστης το μήνυμα(εμφάνιση σελίδας)
@@ -127,12 +128,11 @@ class UI:
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
 
-        # Δημιουργία του πρώτου πλαισίου κειμένου
+        # εισαγωγή των email για δημιουργία ομάδας
         self.create_text_entry("Enter the 1st email", 150)
-        # Δημιουργία του δεύτερου πλαισίου κειμένου
         self.create_text_entry("Enter the 2nd email", 230)
 
-        # Δημιουργία κουμπιού για την υποβολή του κειμένου
+        # Δημιουργία κουμπιού
         self.submit_button = tk.Button(self.root, text="Create", command=self.submit_text)
         self.submit_button.place(x=150, y=310, anchor="nw")
 
@@ -141,19 +141,19 @@ class UI:
         self.add_friend_label.place(x=150, y=125, anchor="nw")
         self.add_friend_label.bind("<Button-1>", self.add_member)
 
-    def create_text_entry(self, default_text, y_position):
+    def create_text_entry(self, default_text, y_position): #δημιουργία texbox
         text_entry = tk.Text(self.root, height=2, width=25)
         text_entry.place(x=20, y=y_position, anchor="nw")
         text_entry.insert("1.0", default_text)
         text_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, text_entry, default_text))
         self.text_entries.append(text_entry)
 
-    def on_entry_click(self, event, entry, default_text):
+    def on_entry_click(self, event, entry, default_text):#απόκρυψη της πρότασης μέσα στο textbox
         if entry.get("1.0", "end-1c") == default_text:
             entry.delete("1.0", "end-1c")
             entry.config(fg='black')
 
-    def submit_text(self):
+    def submit_text(self): #εμφάνιση μηνυμάτων σφάλματος και την λειτουργία της εφαρμογής
         self.emails.clear()
         for entry in self.text_entries:
             email = entry.get("1.0", "end-1c")
@@ -171,6 +171,7 @@ class UI:
         new_text_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, new_text_entry, "Enter an email"))
         self.text_entries.append(new_text_entry)
         self.submit_button.place_configure(y=y_position + 80)
+
 
 # παράθυρο δημιουργίας του chat
 if __name__ == "__main__":
