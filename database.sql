@@ -116,17 +116,19 @@ CREATE TABLE points (
 	FOREIGN KEY (user_id) REFERENCES users(user_id)
 	);
 CREATE TABLE groups (
-	group_id AUTO_INCREMENT PRIMARY KEY,
+	group_id INT AUTO_INCREMENT PRIMARY KEY,
         members TEXT,
 	team_name VARCHAR(255)
 	);
 
 CREATE TABLE booking (
+	user_id INT ,
 	booking_id INT AUTO_INCREMENT PRIMARY KEY,
 	start_t DATE,
     	finish DATE,
 	event VARCHAR(255) NULL,
-	destination VARCHAR(255) 
+	destination VARCHAR(255), 
+	FOREIGN KEY (user_id) REFERENCES users(user_id)
 	);
 
 INSERT INTO destinations (location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food, shopping, mountains, forest, night_life, ratings)
@@ -146,3 +148,5 @@ VALUES
 INSERT INTO points (user_id, points_expiry, total_points) //επειδή δεν έχουμε υλοποιήσει τo περιβάλλον πληρωμής βάζουμε χειροκίνητα τιμή στους πόντους 
 VALUES 
 (3, '2025-04-27', 1200);
+
+INSERT INTO booking (user_id, booking_id, start_t, finish, event, destination) values (3, null, '15/7/2024', '29/7/2024', null, 'Paris');
