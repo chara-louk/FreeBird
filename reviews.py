@@ -43,13 +43,12 @@ class User:
         bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
         bg_canvas.image = bg_photo
 
-        # Create a frame to contain the form elements
-        form_frame = tk.Frame(review_window, bg="#FFEBD6")  # Set background color to white
+        form_frame = tk.Frame(review_window, bg="#FFEBD6")
         form_frame.place(relx=0.5, rely=0.5, anchor="center")
 
         tk.Label(form_frame, text="Review", font=("Helvetica", 14)).pack()
         review_text = tk.Entry(form_frame, font=("Helvetica", 12))
-        review_text.pack(ipadx=50, ipady=10)  # Make the review text entry larger
+        review_text.pack(ipadx=50, ipady=10)
 
         tk.Label(form_frame, text="Rating", font=("Helvetica", 12)).pack()
         rating = tk.Entry(form_frame, font=("Helvetica", 12))
@@ -79,7 +78,7 @@ class User:
                 review=review_text.get(),
                 rating=int(rating.get()) if rating.get() else None,
                 event_id=int(event_id.get()) if event_id.get() else None,
-                attraction_id=int(attraction_id.get()) if attraction_id.get() else None,  # New field for attraction
+                attraction_id=int(attraction_id.get()) if attraction_id.get() else None,
                 review_type="Write"
             )
             new_review.save_review()
@@ -190,13 +189,11 @@ class Reviews:
                 cursor.execute(query, (review_type_val,))
                 reviews = cursor.fetchall()
             else:
-                # Query destinations table to get destination ID based on location
                 cursor.execute("SELECT destination_id FROM destinations WHERE location = %s", (location_val,))
                 dest_id = cursor.fetchone()
                 if dest_id:
-                    dest_id = dest_id[0]  # Extract the destination ID from the result
+                    dest_id = dest_id[0]
 
-                    # Query reviews based on destination ID
                     query = "SELECT * FROM reviews WHERE review_type = %s AND dest_id = %s"
                     values = [review_type_val, dest_id]
                     cursor.execute(query, values)
@@ -222,7 +219,7 @@ class Reviews:
         bg_canvas = tk.Canvas(review_window, width=bg_photo.width(), height=bg_photo.height())
         bg_canvas.pack(fill="both", expand=True)
         bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-        bg_canvas.image = bg_photo  # Keep a reference to avoid garbage collection
+        bg_canvas.image = bg_photo
 
         reviews_frame = tk.Frame(bg_canvas, bg="white")
         reviews_frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -242,6 +239,8 @@ def main():
     window = tk.Tk()
     window.title("Reviews")
 
+    # Επειδή δεν έχουμε συνδέσει κάποιον χρήστη για αυτό το use case και χρειάζεται να πάρει
+    # το id του δημιουργούμε έναν νέο χρήστη με τα δεδομένα του πρώτου στη βάση
     def create_user():
         username = username_entry.get()
         password = password_entry.get()
