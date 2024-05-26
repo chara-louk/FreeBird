@@ -43,8 +43,7 @@ class User:
         bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
         bg_canvas.image = bg_photo
 
-        # Create a frame to contain the form elements
-        form_frame = tk.Frame(review_window, bg="#FFEBD6")  # Set background color to white
+        form_frame = tk.Frame(review_window, bg="#FFEBD6")  
         form_frame.place(relx=0.5, rely=0.5, anchor="center")
 
         tk.Label(form_frame, text="Review", font=("Helvetica", 14)).pack()
