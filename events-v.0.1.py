@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
 
-class MyApp:
+class events:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("FreeBird")
@@ -82,4 +82,4 @@ class MyApp:
         return questionpaper
 
 if __name__ == "__main__":
-    MyApp()
+    events()
