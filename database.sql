@@ -76,7 +76,12 @@ CREATE TABLE transportation (
     FOREIGN KEY (dest_id) REFERENCES destinations(destination_id)
 );
 
-
+CREATE TABLE event (
+	event_id INT AUTO_INCREMENT PRIMARY KEY,
+	type VARCHAR(255),
+	description TEXT,
+	date DATE
+	);
 
 CREATE TABLE trips (
     trip_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -90,6 +95,21 @@ CREATE TABLE trips (
     FOREIGN KEY (accommodation_id) REFERENCES accommodation(accommodation_id),
     FOREIGN KEY (transportation_id) REFERENCES transportation(transportation_id)
 	);
+
+CREATE TABLE reviews (
+	review_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT ,
+    dest_id INT NULL ,
+    accommodation_id INT NULL,
+    review TEXT NOT NULL,
+    rating INT ,
+    event_id INT  NULL,
+    review_type ENUM('Write', 'View', 'Update') NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (dest_id) REFERENCES destinations(destination_id),
+    FOREIGN KEY (accommodation_id) REFERENCES accommodation(accommodation_id),
+    FOREIGN KEY (event_id) REFERENCES event(event_id)
+);
 
 INSERT INTO destinations (location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food, shopping, mountains, forest, night_life, ratings)
 VALUES
