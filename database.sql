@@ -44,19 +44,12 @@ CREATE TABLE destinations (
     FOREIGN KEY (filter_id) REFERENCES filters(filter_id)
 );
 
-
 CREATE TABLE attractions (
     attraction_id INT AUTO_INCREMENT PRIMARY KEY,
+	dest_id INT,
     name VARCHAR(255),
-    description TEXT
-);
-
-CREATE TABLE destination_attraction (
-    dest_id INT,
-    attraction_id INT,
-    PRIMARY KEY (dest_id, attraction_id),
-    FOREIGN KEY (dest_id) REFERENCES destinations(destination_id),
-    FOREIGN KEY (attraction_id) REFERENCES attractions(attraction_id)
+    description TEXT,
+	FOREIGN KEY (dest_id) REFERENCES destinations(destina_id)
 );
 
 
@@ -102,13 +95,17 @@ CREATE TABLE reviews (
     accommodation_id INT NULL,
     review TEXT NOT NULL,
     rating INT ,
+	attraction_id INT NULL,
     event_id INT  NULL,
     review_type ENUM('Write', 'View', 'Update') NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (dest_id) REFERENCES destinations(destination_id),
     FOREIGN KEY (accommodation_id) REFERENCES accommodation(accommodation_id),
-    FOREIGN KEY (event_id) REFERENCES event(event_id)
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+	FOREIGN KEY (attraction_id) REFERENCES attractions(attraction_id)
 );
+
+
 CREATE TABLE points (
 	user_id INT PRIMARY KEY,
 	points_expiry DATE,
