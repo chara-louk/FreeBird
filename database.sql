@@ -7,8 +7,7 @@ CREATE TABLE users (
     surname VARCHAR(255),
     email VARCHAR(255),
     username VARCHAR(255),
-    password VARCHAR(255),
-    points INT(5)
+    password VARCHAR(255)
 );
 CREATE TABLE filters (
     filter_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,6 +109,25 @@ CREATE TABLE reviews (
     FOREIGN KEY (accommodation_id) REFERENCES accommodation(accommodation_id),
     FOREIGN KEY (event_id) REFERENCES event(event_id)
 );
+CREATE TABLE points (
+	user_id INT PRIMARY KEY,
+	points_expiry DATE,
+	total_points INT(10),
+	FOREIGN KEY (user_id) REFERENCES users(user_id)
+	);
+CREATE TABLE groups (
+	group_id AUTO_INCREMENT PRIMARY KEY,
+        members TEXT,
+	team_name VARCHAR(255)
+	);
+
+CREATE TABLE booking (
+	booking_id INT AUTO_INCREMENT PRIMARY KEY,
+	start_t DATE,
+    	finish DATE,
+	event VARCHAR(255) NULL,
+	destination VARCHAR(255) 
+	);
 
 INSERT INTO destinations (location, museums, nature, beach, hiking, art, history, science, wild_life, clubs, sports, food, shopping, mountains, forest, night_life, ratings)
 VALUES
@@ -118,3 +136,13 @@ VALUES
 ('Rio de Janeiro', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 4.2),
 ('Tokyo', 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 4.6),
 ('Cape Town', 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 4.4);
+
+INSERT INTO users (user_id, name, surname, email, username, password)
+VALUES
+(null, 'Maria', 'Nikolaou', 'marianik@email.com', 'MariaNik', 2545),
+(null, 'Petros', 'Petrou', 'ppetrou@email.com', 'PetrouP', 2845),
+(null, 'George', 'Papadopoulos', 'geopap@email.com', 'GeoPap', 25645);
+
+INSERT INTO points (user_id, points_expiry, total_points) //επειδή δεν έχουμε υλοποιήσει τo περιβάλλον πληρωμής βάζουμε χειροκίνητα τιμή στους πόντους 
+VALUES 
+(3, '2025-04-27', 1200);
