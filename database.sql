@@ -160,8 +160,8 @@ VALUES
 (null, 'Petros', 'Petrou', 'ppetrou@email.com', 'PetrouP', 2845),
 (null, 'George', 'Papadopoulos', 'geopap@email.com', 'GeoPap', 25645);
 
-INSERT INTO points (user_id, points_expiry, total_points) //επειδή δεν έχουμε υλοποιήσει τo περιβάλλον πληρωμής βάζουμε χειροκίνητα τιμή στους πόντους 
+INSERT INTO points(user_id, points_expiry, points, total_points)   //επειδή δεν έχουμε υλοποιήσει τo περιβάλλον πληρωμής βάζουμε χειροκίνητα τιμή στους πόντους 
 VALUES 
-(3, '2025-04-27', 1200);
+(3, '2025-04-27', 150, 1200);
 
 INSERT INTO booking (user_id, booking_id, start_t, finish, event, destination) values (3, null, '15/7/2024', '29/7/2024', null, 'Paris');
