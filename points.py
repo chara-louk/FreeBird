@@ -159,9 +159,7 @@ class UI:  # εμφάνιση εφαρμογής
             text = f"\n\n\n\n\n\n\n\nYour {booking_id} booking:\nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}\nDestination: {destination}"
             new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
 
-        pay_button = tk.Button(new_window, text="Pay", command=lambda: self.show_point_info_window_ui(self.usersid[0]))
-        pay_button.place(x=30, y=280, anchor="nw")
-
+       
     def show_point_info_window_ui(self, user_id): #εμφάνιση της ανάλυσης των πόντων
         point_info = self.points.get_all_points()
         if point_info:
@@ -180,7 +178,12 @@ class UI:  # εμφάνιση εφαρμογής
                 points, points_expiry = points_data
                 text = f"\n\n\n\n\n\n\n\n Points                     Expiry:\n {points}                           {points_expiry}"
                 new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
-
+                
+                pay_button = tk.Button(new_window, text="Pay", command=lambda: self.show_payment_window_ui(self.usersid[0]))
+                pay_button.place(x=30, y=280, anchor="nw")
+                
+    def show_payment_window_ui(self, user_id):
+        messagebox.showinfo("Info", "Βooking completion and payment.")
 
 if __name__ == "__main__":
     root = tk.Tk()
