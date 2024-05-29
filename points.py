@@ -39,6 +39,8 @@ class Database:  # σύνδεση με τη βάση
         self.connection.close()
 
 
+
+
 class Points:  # κλάση εμφάνισης πόντων
     def __init__(self, db):
         self.db = db
@@ -156,10 +158,15 @@ class UI:  # εμφάνιση εφαρμογής
 
         for i, booking_data in enumerate(booking_info):
             user_id, booking_id, start_date, finish_date, event, destination = booking_data
-            text = f"\n\n\n\n\n\n\n\nYour {booking_id} booking:\nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}\nDestination: {destination}"
+            text = f"\n\n\n\n\n\n\n\nYour {booking_id} booking:\nDestination: {destination} \nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}"
             new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
 
-       
+            pay_button = tk.Button(new_window, text="Pay", command=lambda: self.show_payment_window_ui(self.usersid[0]))
+            pay_button.place(x=30, y=280, anchor="nw")
+
+    def show_payment_window_ui(self, user_id):
+        messagebox.showinfo("Info", "Βooking completion and payment.")
+        
     def show_point_info_window_ui(self, user_id): #εμφάνιση της ανάλυσης των πόντων
         point_info = self.points.get_all_points()
         if point_info:
@@ -178,10 +185,9 @@ class UI:  # εμφάνιση εφαρμογής
                 points, points_expiry = points_data
                 text = f"\n\n\n\n\n\n\n\n Points                     Expiry:\n {points}                           {points_expiry}"
                 new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
-                
-                pay_button = tk.Button(new_window, text="Pay", command=lambda: self.show_payment_window_ui(self.usersid[0]))
-                pay_button.place(x=30, y=280, anchor="nw")
-                
+
+
+
     def show_payment_window_ui(self, user_id):
         messagebox.showinfo("Info", "Βooking completion and payment.")
 
