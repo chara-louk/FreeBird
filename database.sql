@@ -109,7 +109,7 @@ CREATE TABLE reviews (
 CREATE TABLE points (
 	user_id INT PRIMARY KEY,
 	points_expiry DATE,
-	total_points INT(10),
+	points INT(10),
 	FOREIGN KEY (user_id) REFERENCES users(user_id)
 	);
 CREATE TABLE groups (
