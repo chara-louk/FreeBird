@@ -125,13 +125,16 @@ class Reviews:
         self.event_id = event_id
         self.review_type = review_type
 
-
     def save_review(self):
-        query = "INSERT INTO reviews (user_id, dest_id, accommodation_id, review, rating, event_id, review_type) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        query = """
+        INSERT INTO reviews (user_id, dest_id, accommodation_id, attraction_id, review, rating, event_id, review_type)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
         values = (
             self.user_id,
             self.dest_id if self.dest_id is not None else None,
             self.accommodation_id if self.accommodation_id is not None else None,
+            self.attraction_id if self.attraction_id is not None else None,
             self.review,
             self.rating if self.rating is not None else None,
             self.event_id if self.event_id is not None else None,
@@ -145,7 +148,9 @@ class Reviews:
     def view_reviews_from_db(user_id):
         query = "SELECT * FROM reviews WHERE user_id = %s"
         cursor.execute(query, (user_id,))
-        return cursor.fetchall()
+        reviews = cursor.fetchall()
+        print(f"Fetched reviews: {reviews}")
+        return reviews
 
     @staticmethod
     def update_review(review_id, new_review, new_rating):
@@ -165,20 +170,20 @@ class Reviews:
         bg_canvas = tk.Canvas(filter_window, width=bg_photo.width(), height=bg_photo.height())
         bg_canvas.pack(fill="both", expand=True)
         bg_canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-        bg_canvas.image = bg_photo  # Keep a reference to avoid garbage collection
+        bg_canvas.image = bg_photo
 
-        form_frame = tk.Frame(bg_canvas, bg="white")
-        form_frame.place(relx=0.5, rely=0.5, anchor="center")
+        form_frame = tk.Frame(bg_canvas, bg="#FFEBD6")
+        form_frame.place(relx=0.5, rely=0.3, anchor="center")
 
         tk.Label(form_frame, text="Location").grid(row=0, column=0)
-        location = tk.Entry(form_frame)
+        location = tk.Entry(form_frame, width=30)
         location.grid(row=0, column=1)
-
-        tk.Label(form_frame, text="Type of Review").grid(row=1, column=0)
+        tk.Label(form_frame, text="Type of Review").grid(row=1, column=0, padx=20, pady=10)
         review_type_var = tk.StringVar(value="Event")
         review_type_options = ["Event", "Accommodation", "Attraction"]
-        review_type_menu = ttk.Combobox(form_frame, textvariable=review_type_var, values=review_type_options)
-        review_type_menu.grid(row=1, column=1)
+        review_type_menu = ttk.Combobox(form_frame, textvariable=review_type_var, values=review_type_options,
+                                        width=20)
+        review_type_menu.grid(row=1, column=1, padx=10, pady=5)
 
         def filter_reviews():
             location_val = location.get()
@@ -207,12 +212,13 @@ class Reviews:
 
         filter_btn = tk.Button(form_frame, text="Apply Filters", command=filter_reviews)
         filter_btn.grid(row=2, columnspan=2, pady=10)
+
     @staticmethod
     def display_filtered_reviews(reviews):
         review_window = tk.Toplevel()
         review_window.title("Filtered Reviews")
 
-        bg_image = Image.open("C:/ceid7/software-eng/project/reviewspage.png")
+        bg_image = Image.open("C:/ceid7/software-eng/project/reviewspage2.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
         review_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
 
@@ -226,8 +232,7 @@ class Reviews:
 
         for i, review in enumerate(reviews):
             review_text = f"Review ID: {review[0]}\nUser ID: {review[1]}\nDestination ID: {review[2]}\nAccommodation ID: {review[3]}\nReview: {review[4]}\nRating: {review[5]}\nEvent ID: {review[6]}\nReview Type: {review[7]}"
-            tk.Label(reviews_frame, text=review_text, justify=tk.LEFT, bg="white").grid(row=i, column=0, sticky="w",
-                                                                                        pady=5)
+            tk.Label(reviews_frame, text=review_text, justify=tk.LEFT, bg="white").grid(row=i, column=0, sticky="w", pady=5)
 
         if not reviews:
             tk.Label(reviews_frame, text="No reviews found.", bg="white").pack()
@@ -327,9 +332,8 @@ def main():
         current_user = User(user_id, username, password, email, surname, name)
         show_action_buttons(current_user, window)
 
-
-
     window.mainloop()
+
 
 if __name__ == "__main__":
     main()
