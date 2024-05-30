@@ -19,19 +19,18 @@ class Database:
         )
         self.cursor = self.connection.cursor(buffered=True)
 
-    def user_exists(self, email): #ελεγχος εγγεγραμμένου χρήστη
+    def user_exists(self, email):  # έλεγχος εγγεγραμμένου χρήστη
         self.cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         return self.cursor.fetchone() is not None
 
-    def commit(self): #ενημέρωση βάσης
+    def commit(self):  # ενημέρωση βάσης
         self.connection.commit()
 
-    def close(self): #κλείσιμο σύνδεσης με τη βάση
+    def close(self):  # κλείσιμο σύνδεσης με τη βάση
         self.cursor.close()
         self.connection.close()
 
-
-class Chat: # Διαχείριση συνομιλιών
+class Chat:  # Διαχείριση συνομιλιών
     def __init__(self, db):
         self.db = db
         self.team_name = ""
@@ -46,33 +45,75 @@ class Chat: # Διαχείριση συνομιλιών
         self.db.cursor.execute("INSERT INTO groups (members, team_name) VALUES (%s, %s)", (members, team_name))
         self.db.commit()
 
-    def add_chat_textbox(self, chat_canvas): # προσθήκη textbox για να γράει ο χρήστης το μήνυμα(εμφάνιση σελίδας)
+    def add_chat_textbox(self, chat_canvas):  # προσθήκη textbox για να γράψει ο χρήστης το μήνυμα (εμφάνιση σελίδας)
         self.chat_textbox = tk.Text(chat_canvas, height=1, width=15)
         self.chat_textbox.place(x=80, y=495, anchor="nw")
 
-    def submit_name(self, name_entry, new_window, emails, app): #καταχώρηση ονόματος ομάδας
+    def submit_name(self, name_entry, new_window, emails, app):  # καταχώρηση ονόματος ομάδας
         team_name = name_entry.get("1.0", "end-1c")
         self.create(team_name, emails)
         app.root.withdraw()
-        #εμφάνιση σελίδας
-        chat_window = tk.Toplevel()
+        # εμφάνιση σελίδας
+        chat_window = tk.Toplevel(app.root)  # Χρησιμοποιήστε app.root αντί για self.root
         chat_window.title("Chat ")
 
-        chat_b_image = Image.open("C:/Apps/chat.jpg")
-        chat_b_photo = ImageTk.PhotoImage(chat_b_image)
-        chat_canvas = tk.Canvas(chat_window, width=chat_b_photo.width(), height=chat_b_photo.height())
+        self.background_chat_image = Image.open("C:/Apps/chat.jpg")
+        self.background_chat_photo = ImageTk.PhotoImage(self.background_chat_image)
+
+        chat_canvas = tk.Canvas(chat_window, width=self.background_chat_photo.width(),
+                                height=self.background_chat_photo.height())
         chat_canvas.pack(fill="both", expand=True)
-        chat_canvas.create_image(0, 0, image=chat_b_photo, anchor="nw")
+        chat_canvas.create_image(0, 0, image=self.background_chat_photo, anchor="nw")
 
         self.add_chat_textbox(chat_canvas)
-        #εμφάνιση ονόματος ομάδας
+        # εμφάνιση ονόματος ομάδας
         team_name_label = tk.Label(chat_canvas, text=team_name, font=("Times New Roman", 10, "bold"))
         team_name_label.place(x=30, y=30)
 
-        chat_window.mainloop()
+        # Booking button
+        booking_button = tk.Button(chat_canvas, text="Booking",
+                                   command=lambda: self.show_booking_info_window_ui("user_id_example"))
+        booking_button.place(x=180, y=30, anchor="nw")
 
-# Κύρια κλάση εφαρμογής(βασική ροή)
-class newChat:
+    def show_booking_info_window_ui(self, user_id):
+        booking = Booking(self.db)
+        booking_info = booking.show_bookings(user_id)
+        if not booking_info:
+            return
+
+        new_windows = tk.Toplevel(self.root)
+        new_windows.title("Booking Information")
+
+        self.background_booking_image = Image.open("C:/Apps/bookings.jpg")
+        self.background_booking_photo = ImageTk.PhotoImage(self.background_booking_image)
+
+        new_canvas = tk.Canvas(new_windows, width=self.background_booking_photo.width(),
+                               height=self.background_booking_photo.height())
+        new_canvas.pack(fill="both", expand=True)
+        new_canvas.create_image(0, 0, image=self.background_booking_photo, anchor="nw")
+
+        for i, booking_data in enumerate(booking_info):
+            user_id, booking_id, start_date, finish_date, event, destination = booking_data
+            text = f"Your {booking_id} booking:\nDestination: {destination} \nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}"
+            new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
+
+
+
+class Booking:  # σύνδεση με τη βάση για εμφάνιση κρατήσεων
+    def __init__(self, db):
+        self.db = db
+
+    def show_bookings(self, user_id):
+        query = "SELECT * FROM booking WHERE user_id = %s"
+        self.db.cursor.execute(query, (user_id,))
+        result = self.db.cursor.fetchall()
+        if result:
+            return result
+        else:
+            messagebox.showerror("Info", "You don't have any bookings yet.")
+            return None
+
+class newChat:  # Κύρια κλάση εφαρμογής (βασική ροή)
     def __init__(self, root):
         self.root = root
         self.database = Database()
@@ -81,7 +122,6 @@ class newChat:
         self.background_images()
 
     def background_images(self):
-        # Φόρτωση της εικόνας φόντου
         self.background_image = Image.open("C:/Apps/iphonefriends.jpg")
         self.background_photo = ImageTk.PhotoImage(self.background_image)
 
@@ -89,26 +129,48 @@ class newChat:
         new_window = tk.Toplevel()
         new_window.title("Add Name")
 
+        chat_b_image = Image.open("C:/Apps/iphone.jpg")
+        self.chat_b_photo = ImageTk.PhotoImage(chat_b_image)
 
-        # εικόνα για background
-        new_canvas = tk.Canvas(new_window, width=self.background_photo.width(), height=self.background_photo.height())
+        new_canvas = tk.Canvas(new_window, width=self.chat_b_photo.width(), height=self.chat_b_photo.height())
         new_canvas.pack(fill="both", expand=True)
-        new_canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
+        new_canvas.create_image(0, 0, image=self.chat_b_photo, anchor="nw")
 
-        def new_window():
-            self.root.deiconify()
-        # προσθήκη ονόματος της ομάδας
         name_entry = tk.Text(new_canvas, height=2, width=25)
         name_entry.place(x=20, y=200, anchor="nw")
         name_entry.insert("1.0", "Enter a name")
-        name_entry.bind("<FocusIn>", lambda event: self.ui.on_entry_click(event, name_entry, "Enter a name"))
+        name_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, name_entry, "Enter a name"))
+
         submit_name_button = tk.Button(new_canvas, text="Submit Name", command=lambda: self.chat.submit_name(name_entry, new_window, emails, self))
         submit_name_button.place(x=140, y=280, anchor="nw")
+
         add_photo_label = tk.Label(new_canvas, text="Add Photo", fg="blue", cursor="hand2")
         add_photo_label.place(x=20, y=250, anchor="nw")
 
-        back_button = tk.Button(new_canvas, text="Back", command=new_window)
-        back_button.place(x=20, y=280, anchor="nw")
+    def on_entry_click(self, event, entry, placeholder):
+        # Function to clear the placeholder text on focus
+        if entry.get("1.0", "end-1c") == placeholder:
+            entry.delete("1.0", "end")
+
+    def show_booking_info_window_ui(self, user_id):
+        # Function to handle the booking button action
+        booking = Booking(self.database)
+        booking_info = booking.show_bookings(user_id)
+        if not booking_info:
+            return
+
+        new_windows = tk.Toplevel(self.root)
+        new_windows.title("Booking Information")
+
+        new_canvas = tk.Canvas(new_windows, width=self.background_booking_photo.width(),
+                               height=self.background_booking_photo.height())
+        new_canvas.pack(fill="both", expand=True)
+        new_canvas.create_image(0, 0, image=self.background_booking_photo, anchor="nw")
+
+        for i, booking_data in enumerate(booking_info):
+            user_id, booking_id, start_date, finish_date, event, destination = booking_data
+            text = f"Your {booking_id} booking:\nDestination: {destination} \nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}"
+            new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
 
 # διαμόρφωση UI
 class UI:
@@ -141,19 +203,19 @@ class UI:
         self.add_friend_label.place(x=150, y=125, anchor="nw")
         self.add_friend_label.bind("<Button-1>", self.add_member)
 
-    def create_text_entry(self, default_text, y_position): #δημιουργία texbox
+    def create_text_entry(self, default_text, y_position):  # δημιουργία texbox
         text_entry = tk.Text(self.root, height=2, width=25)
         text_entry.place(x=20, y=y_position, anchor="nw")
         text_entry.insert("1.0", default_text)
         text_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, text_entry, default_text))
         self.text_entries.append(text_entry)
 
-    def on_entry_click(self, event, entry, default_text):#απόκρυψη της πρότασης μέσα στο textbox
+    def on_entry_click(self, event, entry, default_text):  # απόκρυψη της πρότασης μέσα στο textbox
         if entry.get("1.0", "end-1c") == default_text:
             entry.delete("1.0", "end-1c")
             entry.config(fg='black')
 
-    def submit_text(self): #εμφάνιση μηνυμάτων σφάλματος και την λειτουργία της εφαρμογής
+    def submit_text(self):  # εμφάνιση μηνυμάτων σφάλματος και την λειτουργία της εφαρμογής
         self.emails.clear()
         for entry in self.text_entries:
             email = entry.get("1.0", "end-1c")
@@ -172,8 +234,6 @@ class UI:
         self.text_entries.append(new_text_entry)
         self.submit_button.place_configure(y=y_position + 80)
 
-
-# παράθυρο δημιουργίας του chat
 if __name__ == "__main__":
     root = tk.Tk()
     app = newChat(root)
