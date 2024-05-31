@@ -49,7 +49,7 @@ class Chat:  # Διαχείριση συνομιλιών
         self.chat_textbox = tk.Text(chat_canvas, height=1, width=15)
         self.chat_textbox.place(x=80, y=495, anchor="nw")
 
-    def submit_name(self, name_entry, new_window, emails, app):  # καταχώρηση ονόματος ομάδας
+    def show_chat(self, name_entry, new_window, emails, app):  # καταχώρηση ονόματος ομάδας
         team_name = name_entry.get("1.0", "end-1c")
         self.create(team_name, emails)
         app.root.withdraw()
@@ -141,7 +141,10 @@ class newChat:  # Κύρια κλάση εφαρμογής (βασική ροή)
         name_entry.insert("1.0", "Enter a name")
         name_entry.bind("<FocusIn>", lambda event: self.on_entry_click(event, name_entry, "Enter a name"))
 
-        submit_name_button = tk.Button(new_canvas, text="Submit Name", command=lambda: self.chat.submit_name(name_entry, new_window, emails, self))
+        submit_name_button = tk.Button(new_canvas, text="Submit Name", command=lambda: self.chat.show_chat(name_entry,
+                                                                                                           new_window,
+                                                                                                           emails,
+                                                                                                           self))
         submit_name_button.place(x=140, y=280, anchor="nw")
 
         add_photo_label = tk.Label(new_canvas, text="Add Photo", fg="blue", cursor="hand2")
@@ -152,7 +155,7 @@ class newChat:  # Κύρια κλάση εφαρμογής (βασική ροή)
         if entry.get("1.0", "end-1c") == placeholder:
             entry.delete("1.0", "end")
 
-    def show_booking_info_window_ui(self, user_id):
+    def show_booking_ui(self, user_id):
         # Function to handle the booking button action
         booking = Booking(self.database)
         booking_info = booking.show_bookings(user_id)
