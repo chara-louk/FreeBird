@@ -163,7 +163,7 @@ class Reviews:
         filter_window = tk.Toplevel()
         filter_window.title("Add Filters")
 
-        bg_image = Image.open("C:/ceid7/software-eng/project/filterspage.png")
+        bg_image = Image.open("filterspage.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
         filter_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
 
@@ -218,7 +218,7 @@ class Reviews:
         review_window = tk.Toplevel()
         review_window.title("Filtered Reviews")
 
-        bg_image = Image.open("C:/ceid7/software-eng/project/reviewspage2.png")
+        bg_image = Image.open("reviewspage2.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
         review_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
 
@@ -266,7 +266,7 @@ def main():
         current_user.choose_review_type(action)
 
     def show_action_buttons(current_user, window):
-        bg_image = Image.open("C:/ceid7/software-eng/project/reviewspage.png")
+        bg_image = Image.open("reviewspage.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
         window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
 
