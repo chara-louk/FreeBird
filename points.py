@@ -70,7 +70,7 @@ class Booking:  # σύνδεση με τη βάση για εμφάνιση κρ
         if result:
             return result
         else:
-            messagebox.showerror("Info", "You don't have any bookings yet.")
+            messagebox.showerror("Info", "You don't have any booking yet.")
             return None
 
 
@@ -89,7 +89,7 @@ class UI:  # εμφάνιση εφαρμογής
 
     def setup_ui(self):  # περιβάλλον χρήστη
         self.root.title("FreeBird")
-        self.background_image = Image.open("C:/Apps/points.jpg")
+        self.background_image = Image.open("points.jpg")
         self.background_photo = ImageTk.PhotoImage(self.background_image)
 
         self.canvas = tk.Canvas(self.root, width=self.background_photo.width(), height=self.background_photo.height())
@@ -149,7 +149,7 @@ class UI:  # εμφάνιση εφαρμογής
         new_window = tk.Toplevel(self.root)
         new_window.title("Booking Information")
 
-        self.background_booking_image = Image.open("C:/Apps/bookings.jpg")
+        self.background_booking_image = Image.open("bookings.jpg")
         self.background_booking_photo = ImageTk.PhotoImage(self.background_booking_image)
 
         new_canvas = tk.Canvas(new_window, width=self.background_booking_photo.width(), height=self.background_booking_photo.height())
@@ -173,7 +173,7 @@ class UI:  # εμφάνιση εφαρμογής
             new_window = tk.Toplevel(self.root)
             new_window.title("Point Information")
 
-            self.background_analyze_image = Image.open("C:/Apps/points.jpg")
+            self.background_analyze_image = Image.open("points.jpg")
             self.background_analyze_photo = ImageTk.PhotoImage(self.background_analyze_image)
 
             new_canvas = tk.Canvas(new_window, width=self.background_analyze_photo.width(),
