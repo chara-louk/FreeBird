@@ -38,7 +38,7 @@ class Destination:
         destinations_window = tk.Toplevel(window)
         destinations_window.title("Select Destination")
 
-        bg_image = Image.open("C:/ceid7/software-eng/project/iphone2destinations.png")
+        bg_image = Image.open('iphone2destinations.png')
         bg_photo = ImageTk.PhotoImage(bg_image)
 
         destinations_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
@@ -62,7 +62,7 @@ class Destination:
                 display_text += f" (doesn't have: {', '.join(missing_needs)})"
             listbox.insert(tk.END, display_text)
 
-        def on_select(event=None):
+        def chose_dest(event=None):
             selected_index = listbox.curselection()
             if selected_index:
                 selected_dest = filtered_destinations[selected_index[0]][0]
@@ -73,9 +73,9 @@ class Destination:
                 else:
                     messagebox.showerror("Error", "No filter data found.")
 
-        listbox.bind('<<ListboxSelect>>', on_select)
+        listbox.bind('<<ListboxSelect>>', chose_dest)
 
-        select_button = ttk.Button(frame, text="Select", command=on_select)
+        select_button = ttk.Button(frame, text="Select", command=chose_dest)
         select_button.pack(pady=10)
 
     @staticmethod
@@ -216,7 +216,7 @@ class Transportation:
         transportation_window = tk.Toplevel(window)
         transportation_window.title("Select Route")
 
-        bg_image = Image.open("C:/ceid7/software-eng/project/iphone3transp.png")
+        bg_image = Image.open("iphone3transp.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
 
         transportation_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
@@ -247,7 +247,7 @@ class Transportation:
             selected_index = listbox.curselection()
             if selected_index:
                 selected_flight = flights[selected_index[0]]
-                print("Selected flight:", selected_flight)  
+                print("Selected flight:", selected_flight)
 
 
                 messagebox.showinfo("Trip Saved", "Your trip has been saved successfully!")
@@ -281,7 +281,7 @@ class FilterPage:
         self.window.title("FreeBird")
         self.window.geometry("800x600")
 
-        background_image = Image.open("C:/ceid7/software-eng/project/iphone.png")
+        background_image = Image.open("iphone.png")
         background_photo = ImageTk.PhotoImage(background_image)
 
         self.window.geometry(f"{background_photo.width()}x{background_photo.height()}")
@@ -360,7 +360,7 @@ class Trip:
         self.window.title("Trip")
         self.window.geometry("800x600")
 
-        image_path = "C:/ceid7/software-eng/project/iphonearxiki.png"
+        image_path = "iphonearxiki.png"
         try:
             background_image = Image.open(image_path)
             self.background_photo = ImageTk.PhotoImage(background_image)
@@ -397,3 +397,4 @@ if __name__ == "__main__":
     window = tk.Tk()
     Trip(window)
     window.mainloop()
+    
