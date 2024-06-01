@@ -34,7 +34,7 @@ class User:
         review_window = tk.Toplevel()
         review_window.title("Write Review")
 
-        bg_image = Image.open("C:/ceid7/software-eng/project/reviewspage.png")
+        bg_image = Image.open("reviewspage.png")
         bg_photo = ImageTk.PhotoImage(bg_image)
         review_window.geometry(f"{bg_photo.width()}x{bg_photo.height()}")
 
@@ -54,32 +54,37 @@ class User:
         rating = tk.Entry(form_frame, font=("Helvetica", 12))
         rating.pack()
 
-        tk.Label(form_frame, text="Destination (Optional)", font=("Arial", 12)).pack()
-        dest_id = tk.Entry(form_frame, font=("Arial", 12))
-        dest_id.pack()
+        tk.Label(form_frame, text="Reviews About", font=("Arial", 12)).pack()
+        reviews_about = ttk.Combobox(form_frame, values=["attractions", "accommodation", "event", "destination"])
+        reviews_about.pack()
 
-        tk.Label(form_frame, text="Accommodation (Optional)", font=("Arial", 12)).pack()
-        accommodation_id = tk.Entry(form_frame, font=("Arial", 12))
-        accommodation_id.pack()
+        specific_name_label = tk.Label(form_frame, text="Specific Name", font=("Arial", 12))
+        specific_name_entry = tk.Entry(form_frame, font=("Arial", 12))
 
-        tk.Label(form_frame, text="Event (Optional)", font=("Arial", 12)).pack()
-        event_id = tk.Entry(form_frame, font=("Arial", 12))
-        event_id.pack()
+        def show_specific_name_entry(event):
+            specific_name_label.pack_forget()
+            specific_name_entry.pack_forget()
 
-        tk.Label(form_frame, text="Attraction (Optional)", font=("Arial", 12)).pack()
-        attraction_id = tk.Entry(form_frame, font=("Arial", 12))
-        attraction_id.pack()
+            if reviews_about.get() in ["attractions", "accommodation", "event", "destination"]:
+                specific_name_label.config(text=f"{reviews_about.get().capitalize()} Name")
+                specific_name_label.pack()
+                specific_name_entry.pack()
+
+        reviews_about.bind("<<ComboboxSelected>>", show_specific_name_entry)
 
         def save():
+            specific_name = specific_name_entry.get()
+            reviews_about_val = reviews_about.get()
             new_review = Reviews(
                 user_id=self.user_id,
-                dest_id=int(dest_id.get()) if dest_id.get() else None,
-                accommodation_id=int(accommodation_id.get()) if accommodation_id.get() else None,
                 review=review_text.get(),
                 rating=int(rating.get()) if rating.get() else None,
-                event_id=int(event_id.get()) if event_id.get() else None,
-                attraction_id=int(attraction_id.get()) if attraction_id.get() else None,
-                review_type="Write"
+                reviews_about=reviews_about_val,
+                review_type="Write",  # Automatically set to "Write"
+                attraction_name=specific_name if reviews_about_val == "attractions" else None,
+                accommodation_name=specific_name if reviews_about_val == "accommodation" else None,
+                event_name=specific_name if reviews_about_val == "event" else None,
+                destination_name=specific_name if reviews_about_val == "destination" else None
             )
             new_review.save_review()
             review_window.destroy()
@@ -115,30 +120,32 @@ class User:
 
 
 class Reviews:
-    def __init__(self, user_id, dest_id, accommodation_id, attraction_id, review, rating, event_id, review_type):
+    def __init__(self, user_id, review, rating, reviews_about, review_type, attraction_name=None, accommodation_name=None, event_name=None, destination_name=None):
         self.user_id = user_id
-        self.dest_id = dest_id
-        self.accommodation_id = accommodation_id
-        self.attraction_id = attraction_id
         self.review = review
         self.rating = rating
-        self.event_id = event_id
+        self.reviews_about = reviews_about
         self.review_type = review_type
+        self.attraction_name = attraction_name
+        self.accommodation_name = accommodation_name
+        self.event_name = event_name
+        self.destination_name = destination_name
 
     def save_review(self):
         query = """
-        INSERT INTO reviews (user_id, dest_id, accommodation_id, attraction_id, review, rating, event_id, review_type)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO reviews (user_id, review, rating, reviews_about, review_type, attraction_name, accommodation_name, event_name, destination_name)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         values = (
             self.user_id,
-            self.dest_id if self.dest_id is not None else None,
-            self.accommodation_id if self.accommodation_id is not None else None,
-            self.attraction_id if self.attraction_id is not None else None,
             self.review,
             self.rating if self.rating is not None else None,
-            self.event_id if self.event_id is not None else None,
-            self.review_type
+            self.reviews_about,
+            self.review_type,
+            self.attraction_name,
+            self.accommodation_name,
+            self.event_name,
+            self.destination_name
         )
         cursor.execute(query, values)
         db.commit()
@@ -159,7 +166,7 @@ class Reviews:
         db.commit()
         messagebox.showinfo("Success", "Review updated successfully")
 
-    def add_filters(self):
+    def add_filters(user_id):
         filter_window = tk.Toplevel()
         filter_window.title("Add Filters")
 
@@ -180,38 +187,52 @@ class Reviews:
         location.grid(row=0, column=1)
         tk.Label(form_frame, text="Type of Review").grid(row=1, column=0, padx=20, pady=10)
         review_type_var = tk.StringVar(value="Event")
-        review_type_options = ["Event", "Accommodation", "Attraction"]
-        review_type_menu = ttk.Combobox(form_frame, textvariable=review_type_var, values=review_type_options,
-                                        width=20)
+        review_type_options = ["Event", "Accommodation", "Attraction", "Destination"]
+        review_type_menu = ttk.Combobox(form_frame, textvariable=review_type_var, values=review_type_options, width=20)
         review_type_menu.grid(row=1, column=1, padx=10, pady=5)
+
+        specific_name_label = tk.Label(form_frame, text="Specific Name")
+        specific_name_entry = tk.Entry(form_frame)
+
+        def show_specific_name_entry(event):
+            specific_name_label.grid_forget()
+            specific_name_entry.grid_forget()
+
+            if review_type_var.get().lower() in ["event", "accommodation", "attraction", "destination"]:
+                specific_name_label.grid(row=2, column=0, padx=20, pady=10)
+                specific_name_entry.grid(row=2, column=1, padx=10, pady=5)
+
+        review_type_menu.bind("<<ComboboxSelected>>", show_specific_name_entry)
 
         def filter_reviews():
             location_val = location.get()
-            review_type_val = review_type_var.get()
+            review_type_val = review_type_var.get().lower()
+            specific_name = specific_name_entry.get()
 
-            if location_val.lower() == "all":
-                query = "SELECT * FROM reviews WHERE review_type = %s"
-                cursor.execute(query, (review_type_val,))
-                reviews = cursor.fetchall()
-            else:
+            query = "SELECT * FROM reviews WHERE reviews_about = %s"
+            values = [review_type_val]
+
+            if specific_name:
+                query += f" AND {review_type_val}_name = %s"
+                values.append(specific_name)
+
+            if location_val.lower() != "all":
                 cursor.execute("SELECT destination_id FROM destinations WHERE location = %s", (location_val,))
                 dest_id = cursor.fetchone()
                 if dest_id:
                     dest_id = dest_id[0]
-
-                    query = "SELECT * FROM reviews WHERE review_type = %s AND dest_id = %s"
-                    values = [review_type_val, dest_id]
-                    cursor.execute(query, values)
-                    reviews = cursor.fetchall()
+                    query += " AND dest_id = %s"
+                    values.append(dest_id)
                 else:
                     messagebox.showerror("Error", "Location not found")
                     return
 
-            print(reviews)
+            cursor.execute(query, values)
+            reviews = cursor.fetchall()
             Reviews.display_filtered_reviews(reviews)
 
         filter_btn = tk.Button(form_frame, text="Apply Filters", command=filter_reviews)
-        filter_btn.grid(row=2, columnspan=2, pady=10)
+        filter_btn.grid(row=3, columnspan=2, pady=10)
 
     @staticmethod
     def display_filtered_reviews(reviews):
@@ -230,12 +251,35 @@ class Reviews:
         reviews_frame = tk.Frame(bg_canvas, bg="white")
         reviews_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        for i, review in enumerate(reviews):
-            review_text = f"Review ID: {review[0]}\nUser ID: {review[1]}\nDestination ID: {review[2]}\nAccommodation ID: {review[3]}\nReview: {review[4]}\nRating: {review[5]}\nEvent ID: {review[6]}\nReview Type: {review[7]}"
-            tk.Label(reviews_frame, text=review_text, justify=tk.LEFT, bg="white").grid(row=i, column=0, sticky="w", pady=5)
+        for review in reviews:
+            review_box = tk.Frame(reviews_frame, bg="white", bd=2, relief="ridge")
+            review_box.pack(fill="x", padx=10, pady=5, ipady=5)
+
+            tk.Label(review_box, text=f"Review ID: {review[0]}", font=("Arial", 12), bg="white").pack(anchor="w",
+                                                                                                      padx=10)
+            tk.Label(review_box, text=f"User ID: {review[1]}", font=("Arial", 12), bg="white").pack(anchor="w", padx=10)
+            tk.Label(review_box, text=f"Review: {review[2]}", font=("Arial", 12), bg="white").pack(anchor="w", padx=10)
+            tk.Label(review_box, text=f"Rating: {review[3]}", font=("Arial", 12), bg="white").pack(anchor="w", padx=10)
+            tk.Label(review_box, text=f"Reviews About: {review[4]}", font=("Arial", 12), bg="white").pack(anchor="w",
+                                                                                                          padx=10)
+            tk.Label(review_box, text=f"Review Type: {review[5]}", font=("Arial", 12), bg="white").pack(anchor="w",
+                                                                                                        padx=10)
+
+            if review[6]:
+                tk.Label(review_box, text=f"Attraction Name: {review[6]}", font=("Arial", 12), bg="white").pack(
+                    anchor="w", padx=10)
+            if review[7]:
+                tk.Label(review_box, text=f"Accommodation Name: {review[7]}", font=("Arial", 12), bg="white").pack(
+                    anchor="w", padx=10)
+            if review[8]:
+                tk.Label(review_box, text=f"Event Name: {review[8]}", font=("Arial", 12), bg="white").pack(anchor="w",
+                                                                                                           padx=10)
+            if review[9]:
+                tk.Label(review_box, text=f"Destination Name: {review[9]}", font=("Arial", 12), bg="white").pack(
+                    anchor="w", padx=10)
 
         if not reviews:
-            tk.Label(reviews_frame, text="No reviews found.", bg="white").pack()
+            tk.Label(reviews_frame, text="No reviews found.", font=("Arial", 12), bg="white").pack(pady=10)
 
         review_window.mainloop()
 
