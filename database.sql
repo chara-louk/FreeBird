@@ -19,6 +19,7 @@ CREATE TABLE filters (
 	budget float
 );
 
+
 CREATE TABLE destinations (
     destination_id INT AUTO_INCREMENT PRIMARY KEY,
     location VARCHAR(255),
@@ -44,19 +45,29 @@ CREATE TABLE destinations (
     FOREIGN KEY (filter_id) REFERENCES filters(filter_id)
 );
 
+
 CREATE TABLE attractions (
     attraction_id INT AUTO_INCREMENT PRIMARY KEY,
 	dest_id INT,
     name VARCHAR(255),
     description TEXT,
-	FOREIGN KEY (dest_id) REFERENCES destinations(destina_id)
+	FOREIGN KEY (dest_id) REFERENCES destinations(destination_id)
 );
 
 
 
 CREATE TABLE accommodation (
-    accommodation_id INT AUTO_INCREMENT PRIMARY KEY
+    accommodation_id INT AUTO_INCREMENT PRIMARY KEY,
+	dest_id INT,
+	location varchar(255),
+	type ENUM('bnb','hostel','hotel'),
+	price INT,
+	rating float,
+	FOREIGN KEY (dest_id) REFERENCES destinations(destination_id)
+
 );
+
+
 
 CREATE TABLE transportation (
     transportation_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,12 +79,7 @@ CREATE TABLE transportation (
     FOREIGN KEY (dest_id) REFERENCES destinations(destination_id)
 );
 
-CREATE TABLE event (
-	event_id INT AUTO_INCREMENT PRIMARY KEY,
-	type VARCHAR(255),
-	description TEXT,
-	date DATE
-	);
+
 
 CREATE TABLE trips (
     trip_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,36 +94,27 @@ CREATE TABLE trips (
     FOREIGN KEY (transportation_id) REFERENCES transportation(transportation_id)
 	);
 
+
+CREATE TABLE event (
+	event_id INT AUTO_INCREMENT PRIMARY KEY,
+	type VARCHAR(255),
+	description TEXT,
+	date DATE
+	);
+	
 CREATE TABLE reviews (
-	review_id INT AUTO_INCREMENT PRIMARY KEY,
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT ,
-    dest_id INT NULL ,
-    accommodation_id INT NULL,
     review TEXT NOT NULL,
     rating INT ,
-	attraction_id INT NULL,
-    event_id INT  NULL,
+    reviews_about ENUM('attractions','accommodation','event','destination') NOT NULL,
     review_type ENUM('Write', 'View', 'Update') NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (dest_id) REFERENCES destinations(destination_id),
-    FOREIGN KEY (accommodation_id) REFERENCES accommodation(accommodation_id),
-    FOREIGN KEY (event_id) REFERENCES event(event_id),
-	FOREIGN KEY (attraction_id) REFERENCES attractions(attraction_id)
+    attraction_name VARCHAR(255), 
+    accommodation_name VARCHAR(255),
+    event_name VARCHAR(255),
+    destination_name VARCHAR(255)
 );
 
-
-CREATE TABLE points (
-	user_id INT PRIMARY KEY,
-	points_expiry DATE,
-	points INT(10),
-	total_points INT(10),
-	FOREIGN KEY (user_id) REFERENCES users(user_id)
-	);
-CREATE TABLE groups (
-	group_id INT AUTO_INCREMENT PRIMARY KEY,
-        members TEXT,
-	team_name VARCHAR(255)
-	);
 
 CREATE TABLE booking (
 	user_id INT ,
@@ -129,7 +126,9 @@ CREATE TABLE booking (
 	FOREIGN KEY (user_id) REFERENCES users(user_id)
 	);
 
-CREATE TABLE restaurants (
+
+	
+	CREATE TABLE restaurants (
 	rest_id INT AUTO_INCREMENT PRIMARY KEY,
 	name varchar(255),
 	type ENUM('restaurants','coffee'),
@@ -140,8 +139,7 @@ CREATE TABLE restaurants (
 	review_id INT,
 	phone int,
 	open ENUM('yes','no'),
-	FOREIGN KEY (booking_id) REFERENCES booking(booking_id),
-	FOREIGN KEY (review_id) REFERENCES reviews(review_id)
+	FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
 );
 
 
