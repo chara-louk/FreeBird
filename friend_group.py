@@ -46,6 +46,7 @@ class Chat:  # Διαχείριση συνομιλιών
         self.root = root  # Assign root attribute
         self.team_name = ""
         self.emails = []
+        self.booking = Booking(db)
 
     def create(self, team_name, emails):
         self.team_name = team_name
@@ -80,31 +81,29 @@ class Chat:  # Διαχείριση συνομιλιών
         team_name_label = tk.Label(chat_canvas, text=team_name, font=("Times New Roman", 10, "bold"))
         team_name_label.place(x=30, y=30)
 
-        # κουμπί Booking 
+        # κουμπί Booking
         booking_button = tk.Button(chat_canvas, text="Booking", command=lambda: self.show_booking_ui(app.username_email))
         booking_button.place(x=180, y=30, anchor="nw")
 
     def show_booking_ui(self, email):
-        booking = Booking(self.db)
         user_id = self.db.get_user_id_by_email(email)
-        booking_info = booking.show_bookings(user_id)
+        booking_info = self.booking.show_bookings(user_id)
         if not booking_info:
             return
 
-        new_windows = tk.Toplevel(self.root)
-        new_windows.title("Booking Information")
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Booking Information")
 
         self.background_booking_image = Image.open("bookings.jpg")
         self.background_booking_photo = ImageTk.PhotoImage(self.background_booking_image)
 
-        new_canvas = tk.Canvas(new_windows, width=self.background_booking_photo.width(),
-                               height=self.background_booking_photo.height())
+        new_canvas = tk.Canvas(new_window, width=self.background_booking_photo.width(), height=self.background_booking_photo.height())
         new_canvas.pack(fill="both", expand=True)
         new_canvas.create_image(0, 0, image=self.background_booking_photo, anchor="nw")
 
         for i, booking_data in enumerate(booking_info):
             user_id, booking_id, start_date, finish_date, event, destination = booking_data
-            text = f"Your {booking_id} booking:\nDestination: {destination} \nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}"
+            text = f"\n\n\n\n\n\n\n\nYour {booking_id} booking:\nDestination: {destination} \nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}"
             new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
 
 
@@ -126,9 +125,9 @@ class newChat:  # Κύρια κλάση εφαρμογής (βασική ροή)
     def __init__(self, root):
         self.root = root
         self.database = Database()
-        self.chat = Chat(self.database, self.root) 
+        self.chat = Chat(self.database, self.root)
         self.ui = UI(root, self)
-        self.background_images()
+       # self.background_images()
 
     def background_images(self):
         self.background_image = Image.open("iphonefriends.jpg")
@@ -171,14 +170,14 @@ class newChat:  # Κύρια κλάση εφαρμογής (βασική ροή)
         self.background_booking_image = Image.open("bookings.jpg")
         self.background_booking_photo = ImageTk.PhotoImage(self.background_booking_image)
 
-        new_canvas = tk.Canvas(new_window, width=self.background_booking_photo.width(), height=self.background_booking_photo.height())
+        new_canvas = tk.Canvas(new_windows, width=self.background_booking_photo.width(),height=self.background_booking_photo.height())
         new_canvas.pack(fill="both", expand=True)
         new_canvas.create_image(0, 0, image=self.background_booking_photo, anchor="nw")
 
         for i, booking_data in enumerate(booking_info):
             user_id, booking_id, start_date, finish_date, event, destination = booking_data
             text = f"\n\n\n\n\n\n\n\nYour {booking_id} booking:\nDestination: {destination} \nStart Date: {start_date}\nFinish Date: {finish_date}\nEvent: {event}"
-            new_canvas.create_text(20, 20 + i * 80, text=text, anchor="nw", fill="black")
+            new_canvas.create_text(20, 200 + i * 80, text=text, anchor="nw", fill="black")
 
 
 # διαμόρφωση UI
