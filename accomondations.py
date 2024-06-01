@@ -3,21 +3,18 @@ from tkinter import messagebox
 from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 
+
 class Accommodations:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.geometry("800x600")
-        self.root.title("FreeBird")
-
-        self.background_image = Image.open("image.png")
-        self.bg_image = ImageTk.PhotoImage(self.background_image)
-
-        self.canvas = tk.Canvas(self.root, width=800, height=600)
+        self.root.title("Accommodations")
+        self.root.geometry("300x600")
+        self.canvas = tk.Canvas(self.root, width=600, height=400)  # Added initialization of canvas
         self.canvas.pack(fill="both", expand=True)
+        self.bg_image = ImageTk.PhotoImage(Image.open("image.png"))
         self.canvas.create_image(0, 0, image=self.bg_image, anchor="nw")
-
-        self.filters = AccommodationsFilters(self)
         self.trip = Trip(self)
+        self.filters = AccommodationsFilters(self)
         self.SetupStartingWindow()
         self.root.mainloop()
 
@@ -40,6 +37,7 @@ class Accommodations:
             widget.destroy()
         self.canvas.create_image(0, 0, image=self.bg_image, anchor="nw")
 
+
 class Trip:
     def __init__(self, main_app):
         self.main_app = main_app
@@ -57,6 +55,7 @@ class Trip:
 
         submit_button = tk.Button(self.select_date_window, text="Submit", command=self.main_app.filters.ShowFilters)
         submit_button.pack(pady=20)
+
 
 class AccommodationsFilters:
     def __init__(self, main_app):
@@ -94,16 +93,18 @@ class AccommodationsFilters:
             chk.pack(anchor='w', padx=20)
 
         # Submit Button
-        submit_button = tk.Button(self.filters_window, text="Apply Filters", font=('Arial', 12), command=self.ApplyFilters)
+        submit_button = tk.Button(self.filters_window, text="Apply Filters", font=('Arial', 12),
+                                  command=self.ApplyFilters)
         submit_button.pack(pady=20)
 
     def ApplyFilters(self):
         max_price = self.price_entry.get()
         selected_types = [type_name for type_name, var in self.accommodation_type_vars.items() if var.get()]
-        
+
         filters_summary = f"Selected Date: {self.main_app.selected_date}\nMax Price: {max_price}\nSelected Types: {', '.join(selected_types)}"
-        
+
         messagebox.showinfo("Selected Filters", filters_summary)
+
 
 if __name__ == "__main__":
     Accommodations()
