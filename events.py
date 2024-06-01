@@ -1,23 +1,26 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox
+from tkinter import ttk
 from PIL import Image, ImageTk
 
-class events:
+class Events:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("FreeBird")
-        
+
         # Load and set the background image
         self.background_image = Image.open("image.png")
         self.background_photo = ImageTk.PhotoImage(self.background_image)
-        
+
         # Set window size to match the background image
         self.root.geometry(f"{self.background_photo.width()}x{self.background_photo.height()}")
-        
+
         # Create a canvas for the background image
         self.canvas = tk.Canvas(self.root, width=self.background_photo.width(), height=self.background_photo.height())
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
+
+        self.trips = Trips(self)
 
         self.ShowAskUser()
 
@@ -25,7 +28,7 @@ class events:
 
     def ShowAskUser(self):
         label = tk.Label(self.root, text="Do you want to see Events?", font=('Arial', 14), bg='#FFEBED')
-        yes_button = tk.Button(self.root, text="Yes", command=self.ShowQuestions)
+        yes_button = tk.Button(self.root, text="Yes", command=self.trips.ShowQuestions)
         no_button = tk.Button(self.root, text="No", command=self.root.quit)
 
         # Add widgets to the canvas
@@ -33,15 +36,19 @@ class events:
         self.canvas.create_window(50, 250, window=yes_button)
         self.canvas.create_window(150, 250, window=no_button)
 
+class Trips:
+    def __init__(self, main_app):
+        self.main_app = main_app
+
     def ShowQuestions(self):
-        self.root.withdraw()
+        self.main_app.root.withdraw()
         self.questionnaire_window = tk.Toplevel()
         self.questionnaire_window.title("Questionnaire")
         self.questionnaire_window.geometry("800x600")
 
-        self.questionnaire_canvas = tk.Canvas(self.questionnaire_window, width=self.background_photo.width(), height=self.background_photo.height())
+        self.questionnaire_canvas = tk.Canvas(self.questionnaire_window, width=self.main_app.background_photo.width(), height=self.main_app.background_photo.height())
         self.questionnaire_canvas.pack(fill="both", expand=True)
-        self.questionnaire_canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
+        self.questionnaire_canvas.create_image(0, 0, image=self.main_app.background_photo, anchor="nw")
 
         label = tk.Label(self.questionnaire_window, text="Please fill out the questionnaire", font=('Arial', 14), bg='#FFEBED')
         self.questionnaire_canvas.create_window(200, 125, window=label)
@@ -78,8 +85,8 @@ class events:
         questionpaper = [item for item, var in self.check_vars.items() if var.get()]
         messagebox.showinfo("Selected Items", f"You selected: {', '.join(questionpaper)}")
         self.questionnaire_window.destroy()
-        self.root.quit()
+        self.main_app.root.quit()
         return questionpaper
 
 if __name__ == "__main__":
-    events()
+    Events()
