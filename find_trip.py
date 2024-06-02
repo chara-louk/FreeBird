@@ -242,20 +242,24 @@ class Transportation:
         else:
             ttk.Label(frame, text="No routes for this period.", font=("Helvetica", 12, "bold")).pack(anchor="center")
 
-
         def on_save():
             selected_index = listbox.curselection()
             if selected_index:
                 selected_flight = flights[selected_index[0]]
                 print("Selected flight:", selected_flight)
-
-
                 messagebox.showinfo("Trip Saved", "Your trip has been saved successfully!")
             else:
                 messagebox.showwarning("No Selection", "Please select a route.")
 
         save_button = ttk.Button(frame, text="Save Selected Route", command=on_save)
         save_button.pack(pady=10)
+
+    def book_now(self,  start_date, finish_date, destination_name):
+        query = "INSERT INTO booking ( start_t, finish, destination) VALUES ( %s, %s, %s)"
+        values = ( start_date, finish_date, destination_name)
+        self.db.cursor.execute(query, values)
+        self.db.connection.commit()
+        messagebox.showinfo("Success", "Your trip has been booked successfully!")
 
 
 class FilterPage:
@@ -393,8 +397,25 @@ class Trip:
         messagebox.showinfo("Trip Saved", "Your trip has been saved successfully!")
 
 
+class Booking:
+    def __init__(self, db):
+        self.db = db
+
+    def show_bookings(self, user_id):
+        query = "SELECT * FROM booking WHERE user_id = %s"
+        self.db.cursor.execute(query, (user_id,))
+        result = self.db.cursor.fetchall()
+        if result:
+            return result
+        else:
+            messagebox.showerror("Info", "You don't have any bookings yet.")
+            return None
+
+
+
 if __name__ == "__main__":
     window = tk.Tk()
     Trip(window)
     window.mainloop()
+    
     
